@@ -24,6 +24,6 @@ cp .env.example .env
 
 ## 4. Check
 
-Ask your AI Agent: "Check my Evaboot quota and whether my Sales Navigator is connected." Then type `/agents` in Claude Code: `list-builder`, `researcher`, `qualifier` and `writer` must be listed.
+Ask your AI Agent: "Check my Evaboot quota and whether my Sales Navigator is connected." Then ask: "Which project subagents can you use here, and which tools does each one have?" It must list `list-builder`, `researcher`, `qualifier` and `writer`.
 
 Back to the [README](../README.md).
