@@ -41,9 +41,9 @@ def agent(name, text, system, schema, pos):
     node(f"Claude ({name.lower()})", "@n8n/n8n-nodes-langchain.lmChatAnthropic", 1.3, {
         "model": {"__rl": True, "mode": "list", "value": MODEL, "cachedResultName": MODEL},
         "options": {"maxTokensToSample": 4000},
-    }, [pos[0] - 40, pos[1] + 220], ANTHROPIC_CRED)
+    }, [pos[0] - 80, pos[1] + 220], ANTHROPIC_CRED)
     node(f"{name} output", "@n8n/n8n-nodes-langchain.outputParserStructured", 1.3, {
-        "schemaType": "manual", "inputSchema": json.dumps(schema, indent=2)}, [pos[0] + 120, pos[1] + 220])
+        "schemaType": "manual", "inputSchema": json.dumps(schema, indent=2)}, [pos[0] + 60, pos[1] + 220])
     link(f"Claude ({name.lower()})", name, "ai_languageModel")
     link(f"{name} output", name, "ai_outputParser")
 
@@ -140,14 +140,14 @@ node("Fetch page", "n8n-nodes-base.httpRequestTool", 4.2, {
     "options": {"response": {"response": {"responseFormat": "text"}}, "timeout": 20000},
     "optimizeResponse": True, "responseType": "html", "cssSelector": "body", "onlyContent": True,
     "truncateResponse": True, "maxLength": 12000,
-}, [1020, 220])
+}, [1100, 220])
 link("Fetch page", "Researcher", "ai_tool")
 node("Search news", "n8n-nodes-base.httpRequestTool", 4.2, {
     "toolDescription": "Search recent news about a company. Give a query such as \"Acme Ltd\". Returns dated headlines with links.",
     "url": "=https://news.google.com/rss/search?q={{ encodeURIComponent($fromAI('query', 'The company name in quotes', 'string')) }}&hl=en-GB&gl=GB&ceid=GB:en",
     "options": {"response": {"response": {"responseFormat": "text"}}, "timeout": 20000},
     "optimizeResponse": True, "responseType": "text", "truncateResponse": True, "maxLength": 8000,
-}, [1140, 220])
+}, [1240, 220])
 link("Search news", "Researcher", "ai_tool")
 
 agent("Qualifier",
@@ -155,14 +155,14 @@ agent("Qualifier",
       QUALIFY_SYSTEM, {
           "type": "object", "required": ["score", "keep", "reason", "opener_fact", "opener_source"], "properties": {
               "score": {"type": "number"}, "keep": {"type": "boolean"}, "reason": {"type": "string"},
-              "opener_fact": {"type": "string"}, "opener_source": {"type": "string"}}}, [1300, 0])
-node("One lead per company", "n8n-nodes-base.code", 2, {"jsCode": ONE_PER_COMPANY_JS}, [1560, 0])
+              "opener_fact": {"type": "string"}, "opener_source": {"type": "string"}}}, [1480, 0])
+node("One lead per company", "n8n-nodes-base.code", 2, {"jsCode": ONE_PER_COMPANY_JS}, [1720, 0])
 agent("Writer", "={{ JSON.stringify($json) }}", WRITE_SYSTEM, {
     "type": "object", "required": ["subject", "body"], "properties": {
-        "subject": {"type": "string"}, "body": {"type": "string"}}}, [1800, 0])
-node("Email rows", "n8n-nodes-base.code", 2, {"jsCode": CSV_JS}, [2060, 0])
+        "subject": {"type": "string"}, "body": {"type": "string"}}}, [1960, 0])
+node("Email rows", "n8n-nodes-base.code", 2, {"jsCode": CSV_JS}, [2200, 0])
 node("Emails CSV", "n8n-nodes-base.convertToFile", 1.1, {
-    "operation": "csv", "options": {"fileName": "emails.csv"}}, [2280, 0])
+    "operation": "csv", "options": {"fileName": "emails.csv"}}, [2420, 0])
 
 for a, b in [("Run the team", "Your settings"), ("Your settings", "List builder"),
              ("List builder", "Keep matching leads"), ("Keep matching leads", "Researcher"),

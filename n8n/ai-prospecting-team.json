@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "acf142d7-0f73-48b6-94c2-d10f0400d330",
+      "id": "65870d33-8881-4057-9b27-e4b7005f91d5",
       "name": "Run the team",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -17,13 +17,13 @@
         "assignments": {
           "assignments": [
             {
-              "id": "64f62bb3-62fc-41bd-9dfa-2030d8d24690",
+              "id": "879c55c7-c3f1-4269-b312-dcf0e7ed7a0f",
               "name": "export_id",
               "type": "string",
               "value": "PASTE_YOUR_EVABOOT_EXPORT_ID"
             },
             {
-              "id": "011c7d81-02a7-443a-bcc1-9a1336a91b45",
+              "id": "22f65284-9524-477b-942b-951cf8cae4b1",
               "name": "brief",
               "type": "string",
               "value": "PASTE YOUR BRIEF (see BRIEF.md): who you sell to, what disqualifies a lead, your offer, the sender name."
@@ -32,7 +32,7 @@
         },
         "options": {}
       },
-      "id": "9e1b9066-6149-491b-bf29-4a4a6eee825c",
+      "id": "21c59a3b-8847-4d98-bd61-722a032c922a",
       "name": "Your settings",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -57,7 +57,7 @@
           "timeout": 120000
         }
       },
-      "id": "183e0833-c1b3-4e17-bd2e-143e00c38622",
+      "id": "752c6845-1b85-4d6b-af23-47fe680820c5",
       "name": "List builder",
       "type": "@n8n/n8n-nodes-langchain.mcpClient",
       "typeVersion": 1.1,
@@ -76,7 +76,7 @@
       "parameters": {
         "jsCode": "\n// List builder: keep leads that match your filters with a safe email. Time in role = years + months.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? null : n; };\nconst all = $json.structuredContent?.result?.prospects || [];\nconst kept = all.filter(p => p['Matches Filters'] === 'YES' && p['Email Status'] === 'safe');\nreturn kept.map((p, i) => ({ json: {\n  id: `lead-${String(i + 1).padStart(2, '0')}`,\n  first_name: p['First Name'] || '', last_name: p['Last Name'] || '', email: p['Email'],\n  title: String(p['Current Job'] || '').trim(), linkedin_url: p['Linkedin URL Public'] || '',\n  months_in_role: (num(p['Years in Position']) || 0) * 12 + (num(p['Months in Position']) || 0),\n  company: p['Company Name'] || '', company_domain: p['Company Domain'] || '',\n  company_website: p['Company Website'] || '', company_headcount: num(p['Company Employee Exact Count']),\n  company_industry: p['Company Industry'] || '', company_hq: p['Company Headquarters (Full Address)'] || '',\n} }));\n"
       },
-      "id": "a8115f91-56bb-46a8-93f2-8504ef81e092",
+      "id": "e20632c8-c2eb-4abe-b117-e46c78b57941",
       "name": "Keep matching leads",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -95,7 +95,7 @@
           "maxIterations": 12
         }
       },
-      "id": "a06713ff-dad1-453a-a667-f293a2e9ef09",
+      "id": "a933b92c-17dc-4b03-b334-b55697e5ae1d",
       "name": "Researcher",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
@@ -119,12 +119,12 @@
           "maxTokensToSample": 4000
         }
       },
-      "id": "1e16d9be-ee6a-4ea9-b0ee-00d4b55a5480",
+      "id": "d8bc0534-5b9a-48bc-be66-7875f453c267",
       "name": "Claude (researcher)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        860,
+        820,
         220
       ],
       "credentials": {
@@ -139,12 +139,12 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"what_they_sell\",\n    \"facts\",\n    \"no_fact_found\"\n  ],\n  \"properties\": {\n    \"what_they_sell\": {\n      \"type\": \"string\"\n    },\n    \"no_fact_found\": {\n      \"type\": \"boolean\"\n    },\n    \"facts\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"fact\",\n          \"source\",\n          \"date\"\n        ],\n        \"properties\": {\n          \"fact\": {\n            \"type\": \"string\"\n          },\n          \"source\": {\n            \"type\": \"string\"\n          },\n          \"date\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}"
       },
-      "id": "e2fbce42-5f87-4c79-b1e8-7e41096d9358",
+      "id": "2787a6d6-46ab-44f5-9933-866a124adca2",
       "name": "Researcher output",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1020,
+        960,
         220
       ]
     },
@@ -167,12 +167,12 @@
         "truncateResponse": true,
         "maxLength": 12000
       },
-      "id": "82dacff1-e25d-43c1-98e1-3b2c46416ac4",
+      "id": "27a49cf3-662b-4d26-9f71-9be64a737f47",
       "name": "Fetch page",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1020,
+        1100,
         220
       ]
     },
@@ -193,12 +193,12 @@
         "truncateResponse": true,
         "maxLength": 8000
       },
-      "id": "b9d8a3c4-737d-4fb8-81bb-102a91078972",
+      "id": "b8805ed4-4120-49b0-a31b-65bafc878439",
       "name": "Search news",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1140,
+        1240,
         220
       ]
     },
@@ -212,12 +212,12 @@
           "maxIterations": 12
         }
       },
-      "id": "f08330b1-9713-412e-84a3-acb2ac440fae",
+      "id": "90456fb4-2456-493d-9324-1582b3b2202b",
       "name": "Qualifier",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        1300,
+        1480,
         0
       ],
       "retryOnFail": true,
@@ -236,12 +236,12 @@
           "maxTokensToSample": 4000
         }
       },
-      "id": "ef9fae8c-05e3-4b3f-b771-0362e9e06296",
+      "id": "a98e824e-f749-4d49-a7cf-af97c88d5b6d",
       "name": "Claude (qualifier)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        1260,
+        1400,
         220
       ],
       "credentials": {
@@ -256,12 +256,12 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"score\",\n    \"keep\",\n    \"reason\",\n    \"opener_fact\",\n    \"opener_source\"\n  ],\n  \"properties\": {\n    \"score\": {\n      \"type\": \"number\"\n    },\n    \"keep\": {\n      \"type\": \"boolean\"\n    },\n    \"reason\": {\n      \"type\": \"string\"\n    },\n    \"opener_fact\": {\n      \"type\": \"string\"\n    },\n    \"opener_source\": {\n      \"type\": \"string\"\n    }\n  }\n}"
       },
-      "id": "49341c27-32ee-49ec-b74b-06e37f9018db",
+      "id": "befcb348-4144-4b77-9a67-2be9f42dc666",
       "name": "Qualifier output",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1420,
+        1540,
         220
       ]
     },
@@ -269,12 +269,12 @@
       "parameters": {
         "jsCode": "\n// Qualifier rule: one lead per company, the highest score wins. Then keep score >= 60 and no disqualifier.\n// Each row is joined to the lead it came from (paired items), never by position.\nconst rows = $input.all().map((it, i) => ({\n  ...$('Keep matching leads').itemMatching(i).json,\n  research: $('Researcher').itemMatching(i).json.output,\n  ...it.json.output,\n}));\nconst best = {};\nfor (const r of rows) if (r.keep && (!best[r.company] || r.score > best[r.company].score)) best[r.company] = r;\nreturn Object.values(best).map(r => ({ json: r }));\n"
       },
-      "id": "d79a242f-f052-4059-98cc-2c2a9897a702",
+      "id": "b42342ed-71a8-487a-aaf1-e741414a5b25",
       "name": "One lead per company",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1560,
+        1720,
         0
       ]
     },
@@ -288,12 +288,12 @@
           "maxIterations": 12
         }
       },
-      "id": "1951908e-c220-4439-92b7-efa8d3558278",
+      "id": "718bc188-50e9-4a38-b541-2f58a28cdad6",
       "name": "Writer",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
       "position": [
-        1800,
+        1960,
         0
       ],
       "retryOnFail": true,
@@ -312,12 +312,12 @@
           "maxTokensToSample": 4000
         }
       },
-      "id": "673d1f64-74d9-4c61-a594-6e213ab6387b",
+      "id": "0a395324-7bd2-490a-bcc8-c480e1441beb",
       "name": "Claude (writer)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        1760,
+        1880,
         220
       ],
       "credentials": {
@@ -332,12 +332,12 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"subject\",\n    \"body\"\n  ],\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  }\n}"
       },
-      "id": "d701a5f1-fb2b-470a-9a45-6aa9226adcf9",
+      "id": "51bb18ac-5218-447f-9540-5b6ff1f95247",
       "name": "Writer output",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
       "position": [
-        1920,
+        2020,
         220
       ]
     },
@@ -345,12 +345,12 @@
       "parameters": {
         "jsCode": "\nreturn $input.all().map((it, i) => {\n  const lead = $('One lead per company').itemMatching(i).json;\n  return { json: {\n    email: lead.email, first_name: lead.first_name, last_name: lead.last_name, company: lead.company,\n    score: lead.score, subject: it.json.output.subject, body: it.json.output.body, source: lead.opener_source || '',\n  } };\n});\n"
       },
-      "id": "7926d2fa-0b2c-41d3-b60f-fb03fe8a1b6b",
+      "id": "0bfe37bc-083c-4324-a967-a87b0d1e9ed9",
       "name": "Email rows",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2060,
+        2200,
         0
       ]
     },
@@ -361,12 +361,12 @@
           "fileName": "emails.csv"
         }
       },
-      "id": "d53d600a-abea-4501-a97a-b12fb45eae68",
+      "id": "1ec0a02e-fd7e-4265-b168-dfc9b9a7a1e4",
       "name": "Emails CSV",
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,
       "position": [
-        2280,
+        2420,
         0
       ]
     }
