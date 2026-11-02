@@ -2,13 +2,24 @@
   "name": "ai-prospecting-team",
   "version": "1.0.0",
   "description": "Run a prospecting team of four Claude Code subagents: a list builder that exports leads with the Evaboot MCP, researchers, a qualifier and a writer that drafts one email per kept lead. Nothing is sent.",
-  "author": { "name": "Evaboot", "url": "https://evaboot.com" },
+  "author": {
+    "name": "Evaboot",
+    "url": "https://evaboot.com"
+  },
   "homepage": "https://evaboot.com/blog/how-to-use-ai-agents-for-prospecting",
   "repository": "https://github.com/evaboot-labs/ai-prospecting-team",
   "license": "MIT",
   "privacyPolicyUrl": "https://evaboot.com/privacy-policy",
-  "keywords": ["subagents", "claude-code", "sales-navigator", "prospecting", "cold-email", "evaboot", "mcp", "multi-agent"],
+  "keywords": [
+    "subagents",
+    "claude-code",
+    "sales-navigator",
+    "prospecting",
+    "cold-email",
+    "evaboot",
+    "mcp",
+    "multi-agent"
+  ],
   "skills": "./skills/",
-  "agents": ["./agents/list-builder.md", "./agents/researcher.md", "./agents/qualifier.md", "./agents/writer.md"],
   "mcpServers": "./.mcp.json"
 }
