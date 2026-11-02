@@ -1,0 +1,7 @@
+{"layout": "flow", "eyebrow": "evaboot-labs · ai-prospecting-team", "headline": "Four agents. One prospect list.",
+ "subline": "Claude Code subagents that build, research, qualify and write, then hand over.",
+ "nodes": [{"label": "01 · List builder", "title": "Evaboot MCP", "caption": "Exports the leads you approve"},
+           {"label": "02 · Researchers", "title": "In parallel", "caption": "One dated fact per company"},
+           {"label": "03 · Qualifier", "title": "Your brief", "caption": "Scores, keeps or drops each lead"},
+           {"label": "04 · Writer", "title": "Drafts to review", "caption": "One email per lead, nothing sent"}],
+ "spec": "server <em>mcp.evaboot.com/mcp</em> · agents in <em>agents/*.md</em>"}

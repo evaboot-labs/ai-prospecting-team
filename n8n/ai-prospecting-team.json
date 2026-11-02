@@ -1,0 +1,567 @@
+{
+  "name": "AI prospecting team (Evaboot + Claude)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "acf142d7-0f73-48b6-94c2-d10f0400d330",
+      "name": "Run the team",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "64f62bb3-62fc-41bd-9dfa-2030d8d24690",
+              "name": "export_id",
+              "type": "string",
+              "value": "PASTE_YOUR_EVABOOT_EXPORT_ID"
+            },
+            {
+              "id": "011c7d81-02a7-443a-bcc1-9a1336a91b45",
+              "name": "brief",
+              "type": "string",
+              "value": "PASTE YOUR BRIEF (see BRIEF.md): who you sell to, what disqualifies a lead, your offer, the sender name."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e1b9066-6149-491b-bf29-4a4a6eee825c",
+      "name": "Your settings",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.evaboot.com/mcp",
+        "authentication": "bearerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "list",
+          "value": "get_export",
+          "cachedResultName": "get_export"
+        },
+        "inputMode": "json",
+        "jsonInput": "={{ JSON.stringify({ extraction_id: $('Your settings').first().json.export_id }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "183e0833-c1b3-4e17-bd2e-143e00c38622",
+      "name": "List builder",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "",
+          "name": "Evaboot MCP (Bearer)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// List builder: keep leads that match your filters with a safe email. Time in role = years + months.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? null : n; };\nconst all = $json.structuredContent?.result?.prospects || [];\nconst kept = all.filter(p => p['Matches Filters'] === 'YES' && p['Email Status'] === 'safe');\nreturn kept.map((p, i) => ({ json: {\n  id: `lead-${String(i + 1).padStart(2, '0')}`,\n  first_name: p['First Name'] || '', last_name: p['Last Name'] || '', email: p['Email'],\n  title: String(p['Current Job'] || '').trim(), linkedin_url: p['Linkedin URL Public'] || '',\n  months_in_role: (num(p['Years in Position']) || 0) * 12 + (num(p['Months in Position']) || 0),\n  company: p['Company Name'] || '', company_domain: p['Company Domain'] || '',\n  company_website: p['Company Website'] || '', company_headcount: num(p['Company Employee Exact Count']),\n  company_industry: p['Company Industry'] || '', company_hq: p['Company Headquarters (Full Address)'] || '',\n} }));\n"
+      },
+      "id": "a8115f91-56bb-46a8-93f2-8504ef81e092",
+      "name": "Keep matching leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the researcher of a prospecting team. You find facts. You do not judge fit and you do not write emails.\nFor the company in the lead JSON: first call Search news with the company name in quotes; its results are dated headlines with links.\nThen open the company website, or a news link, with Fetch page to confirm a fact (at most 6 calls in total).\nKeep at most two facts from the last 12 months, newest first. A fact is something that happened, with the date the page shows and its URL.\n\"Opened 3 SDR roles, posted 2026-10-14\" is a fact. \"Growing fast\" is not. Never guess a date. If nothing is found, set no_fact_found to true.\nAlso say in one line what the company sells, from its own site.",
+          "maxIterations": 12
+        }
+      },
+      "id": "a06713ff-dad1-453a-a667-f293a2e9ef09",
+      "name": "Researcher",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        900,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5-5",
+          "cachedResultName": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4000
+        }
+      },
+      "id": "1e16d9be-ee6a-4ea9-b0ee-00d4b55a5480",
+      "name": "Claude (researcher)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        860,
+        220
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"what_they_sell\",\n    \"facts\",\n    \"no_fact_found\"\n  ],\n  \"properties\": {\n    \"what_they_sell\": {\n      \"type\": \"string\"\n    },\n    \"no_fact_found\": {\n      \"type\": \"boolean\"\n    },\n    \"facts\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"fact\",\n          \"source\",\n          \"date\"\n        ],\n        \"properties\": {\n          \"fact\": {\n            \"type\": \"string\"\n          },\n          \"source\": {\n            \"type\": \"string\"\n          },\n          \"date\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}"
+      },
+      "id": "e2fbce42-5f87-4c79-b1e8-7e41096d9358",
+      "name": "Researcher output",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1020,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Open a web page and return its text. Give the full URL.",
+        "url": "={{ $fromAI('url', 'The full URL of the page to open', 'string') }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        },
+        "optimizeResponse": true,
+        "responseType": "html",
+        "cssSelector": "body",
+        "onlyContent": true,
+        "truncateResponse": true,
+        "maxLength": 12000
+      },
+      "id": "82dacff1-e25d-43c1-98e1-3b2c46416ac4",
+      "name": "Fetch page",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1020,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search recent news about a company. Give a query such as \"Acme Ltd\". Returns dated headlines with links.",
+        "url": "=https://news.google.com/rss/search?q={{ encodeURIComponent($fromAI('query', 'The company name in quotes', 'string')) }}&hl=en-GB&gl=GB&ceid=GB:en",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        },
+        "optimizeResponse": true,
+        "responseType": "text",
+        "truncateResponse": true,
+        "maxLength": 8000
+      },
+      "id": "b9d8a3c4-737d-4fb8-81bb-102a91078972",
+      "name": "Search news",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify({ lead: $('Keep matching leads').item.json, research: $json.output }) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are the qualifier of a prospecting team. You judge. Use only the lead and research JSON.\nScore 0 to 100: role 40 (the title is a buyer named in the brief), company 30 (industry, headcount and region match),\ntiming 20 (a dated, sourced fact gives a reason to talk now), tenure 10 (3 to 24 months in the role).\nA missing field scores 0, never a guess. Then apply the brief's disqualifiers, and only those: any match sets keep to false.\nKeep when the score is 60 or more and no disqualifier applies. The reason names the fields and facts used.\nopener_fact is the research fact the writer should use (empty if none); opener_source is its URL.\n\nBrief:\n{{ $('Your settings').first().json.brief }}",
+          "maxIterations": 12
+        }
+      },
+      "id": "f08330b1-9713-412e-84a3-acb2ac440fae",
+      "name": "Qualifier",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5-5",
+          "cachedResultName": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4000
+        }
+      },
+      "id": "ef9fae8c-05e3-4b3f-b771-0362e9e06296",
+      "name": "Claude (qualifier)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1260,
+        220
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"score\",\n    \"keep\",\n    \"reason\",\n    \"opener_fact\",\n    \"opener_source\"\n  ],\n  \"properties\": {\n    \"score\": {\n      \"type\": \"number\"\n    },\n    \"keep\": {\n      \"type\": \"boolean\"\n    },\n    \"reason\": {\n      \"type\": \"string\"\n    },\n    \"opener_fact\": {\n      \"type\": \"string\"\n    },\n    \"opener_source\": {\n      \"type\": \"string\"\n    }\n  }\n}"
+      },
+      "id": "49341c27-32ee-49ec-b74b-06e37f9018db",
+      "name": "Qualifier output",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1420,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Qualifier rule: one lead per company, the highest score wins. Then keep score >= 60 and no disqualifier.\n// Each row is joined to the lead it came from (paired items), never by position.\nconst rows = $input.all().map((it, i) => ({\n  ...$('Keep matching leads').itemMatching(i).json,\n  research: $('Researcher').itemMatching(i).json.output,\n  ...it.json.output,\n}));\nconst best = {};\nfor (const r of rows) if (r.keep && (!best[r.company] || r.score > best[r.company].score)) best[r.company] = r;\nreturn Object.values(best).map(r => ({ json: r }));\n"
+      },
+      "id": "d79a242f-f052-4059-98cc-2c2a9897a702",
+      "name": "One lead per company",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are the writer of a prospecting team. Write one first email from the brief and the opener fact. Never send.\nSubject: 2 to 5 words, lower case. Line 1: the opener fact, said plainly. Line 2: why it matters to this role.\nLine 3: the offer in one sentence, naming the product, with the proof from the brief. Line 4: one low-effort question.\nUnder 100 words, no links, blank line between paragraphs, signed with the sender name from the brief.\nNever invent a fact, a number or a name. If opener_fact is empty, open on the role and company instead.\n\nBrief:\n{{ $('Your settings').first().json.brief }}",
+          "maxIterations": 12
+        }
+      },
+      "id": "1951908e-c220-4439-92b7-efa8d3558278",
+      "name": "Writer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1800,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-5-5",
+          "cachedResultName": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4000
+        }
+      },
+      "id": "673d1f64-74d9-4c61-a594-6e213ab6387b",
+      "name": "Claude (writer)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1760,
+        220
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "",
+          "name": "Anthropic"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"subject\",\n    \"body\"\n  ],\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  }\n}"
+      },
+      "id": "d701a5f1-fb2b-470a-9a45-6aa9226adcf9",
+      "name": "Writer output",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1920,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn $input.all().map((it, i) => {\n  const lead = $('One lead per company').itemMatching(i).json;\n  return { json: {\n    email: lead.email, first_name: lead.first_name, last_name: lead.last_name, company: lead.company,\n    score: lead.score, subject: it.json.output.subject, body: it.json.output.body, source: lead.opener_source || '',\n  } };\n});\n"
+      },
+      "id": "7926d2fa-0b2c-41d3-b60f-fb03fe8a1b6b",
+      "name": "Email rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2060,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "csv",
+        "options": {
+          "fileName": "emails.csv"
+        }
+      },
+      "id": "d53d600a-abea-4501-a97a-b12fb45eae68",
+      "name": "Emails CSV",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2280,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Claude (researcher)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Researcher",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Researcher output": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Researcher",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch page": {
+      "ai_tool": [
+        [
+          {
+            "node": "Researcher",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search news": {
+      "ai_tool": [
+        [
+          {
+            "node": "Researcher",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (qualifier)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Qualifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualifier output": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Qualifier",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude (writer)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Writer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writer output": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Writer",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run the team": {
+      "main": [
+        [
+          {
+            "node": "Your settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Your settings": {
+      "main": [
+        [
+          {
+            "node": "List builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List builder": {
+      "main": [
+        [
+          {
+            "node": "Keep matching leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep matching leads": {
+      "main": [
+        [
+          {
+            "node": "Researcher",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Researcher": {
+      "main": [
+        [
+          {
+            "node": "Qualifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qualifier": {
+      "main": [
+        [
+          {
+            "node": "One lead per company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One lead per company": {
+      "main": [
+        [
+          {
+            "node": "Writer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Writer": {
+      "main": [
+        [
+          {
+            "node": "Email rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email rows": {
+      "main": [
+        [
+          {
+            "node": "Emails CSV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
