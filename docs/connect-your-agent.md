@@ -18,6 +18,8 @@ cp .env.example .env
 
 **Claude Code:** write your key from [dash.evaboot.com/dash/api/](https://dash.evaboot.com/dash/api/) into `.env` as `EVABOOT_API_KEY`, load it (`set -a; . ./.env; set +a`), then start Claude Code from this folder. It reads `.mcp.json` and asks you to approve the `evaboot` server. Or sign in with a Claude account that already has the Evaboot connector (*Settings > Connectors > Add custom connector*, URL `https://mcp.evaboot.com/mcp`).
 
+**Claude Code plugin** (installed with `/plugin install`, no clone): export your key before you start Claude Code, `export EVABOOT_API_KEY=<your key>`. Without it the `evaboot` server does not connect.
+
 **Codex, Cursor:** add `https://mcp.evaboot.com/mcp` as an HTTP MCP server with the header `Authorization: Bearer <your key>`. These agents have no subagents: the skill then runs the four steps itself, one after the other, with the same files.
 
 ## 4. Check

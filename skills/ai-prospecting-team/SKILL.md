@@ -33,7 +33,7 @@ Split the kept leads into batches of 3 (`a`, `b`, ...); two leads at the same co
 
 ## 4. Qualifier
 
-Launch the `qualifier` subagent. Read `3-qualified.json` and show the user a table: name, company, score, keep, reason.
+Launch the `qualifier` subagent with the run folder and the list of `2-research-<batch>.json` files. Read `3-qualified.json` and show the user a table: name, company, score, keep, reason.
 
 ## 5. Writer
 

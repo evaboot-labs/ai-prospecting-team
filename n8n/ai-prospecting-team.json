@@ -3,7 +3,7 @@
   "nodes": [
     {
       "parameters": {},
-      "id": "4475a2f2-45e0-4b83-ac96-03d0fabaef5e",
+      "id": "acf142d7-0f73-48b6-94c2-d10f0400d330",
       "name": "Run the team",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
@@ -17,13 +17,13 @@
         "assignments": {
           "assignments": [
             {
-              "id": "c8ce3306-b42f-4a35-8311-0788d77fdfcd",
+              "id": "64f62bb3-62fc-41bd-9dfa-2030d8d24690",
               "name": "export_id",
               "type": "string",
               "value": "PASTE_YOUR_EVABOOT_EXPORT_ID"
             },
             {
-              "id": "84cc9bf7-2652-4517-a15d-ec9ee52747b0",
+              "id": "011c7d81-02a7-443a-bcc1-9a1336a91b45",
               "name": "brief",
               "type": "string",
               "value": "PASTE YOUR BRIEF (see BRIEF.md): who you sell to, what disqualifies a lead, your offer, the sender name."
@@ -32,7 +32,7 @@
         },
         "options": {}
       },
-      "id": "15b9208a-dfa1-4437-a9a4-835b5a40d843",
+      "id": "9e1b9066-6149-491b-bf29-4a4a6eee825c",
       "name": "Your settings",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
@@ -57,7 +57,7 @@
           "timeout": 120000
         }
       },
-      "id": "e1dbc2d0-4607-4688-bbaa-b3bd13ff2345",
+      "id": "183e0833-c1b3-4e17-bd2e-143e00c38622",
       "name": "List builder",
       "type": "@n8n/n8n-nodes-langchain.mcpClient",
       "typeVersion": 1.1,
@@ -76,7 +76,7 @@
       "parameters": {
         "jsCode": "\n// List builder: keep leads that match your filters with a safe email. Time in role = years + months.\nconst num = v => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isNaN(n) ? null : n; };\nconst all = $json.structuredContent?.result?.prospects || [];\nconst kept = all.filter(p => p['Matches Filters'] === 'YES' && p['Email Status'] === 'safe');\nreturn kept.map((p, i) => ({ json: {\n  id: `lead-${String(i + 1).padStart(2, '0')}`,\n  first_name: p['First Name'] || '', last_name: p['Last Name'] || '', email: p['Email'],\n  title: String(p['Current Job'] || '').trim(), linkedin_url: p['Linkedin URL Public'] || '',\n  months_in_role: (num(p['Years in Position']) || 0) * 12 + (num(p['Months in Position']) || 0),\n  company: p['Company Name'] || '', company_domain: p['Company Domain'] || '',\n  company_website: p['Company Website'] || '', company_headcount: num(p['Company Employee Exact Count']),\n  company_industry: p['Company Industry'] || '', company_hq: p['Company Headquarters (Full Address)'] || '',\n} }));\n"
       },
-      "id": "46c1073a-248d-4eb9-8acd-0b11d64d3381",
+      "id": "a8115f91-56bb-46a8-93f2-8504ef81e092",
       "name": "Keep matching leads",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -95,7 +95,7 @@
           "maxIterations": 12
         }
       },
-      "id": "aa0c54ee-0082-4b0e-b7b6-ef71c38930f3",
+      "id": "a06713ff-dad1-453a-a667-f293a2e9ef09",
       "name": "Researcher",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
@@ -119,7 +119,7 @@
           "maxTokensToSample": 4000
         }
       },
-      "id": "f99696d6-b198-4d7c-9c47-f56ab0269e3c",
+      "id": "1e16d9be-ee6a-4ea9-b0ee-00d4b55a5480",
       "name": "Claude (researcher)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -139,7 +139,7 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"what_they_sell\",\n    \"facts\",\n    \"no_fact_found\"\n  ],\n  \"properties\": {\n    \"what_they_sell\": {\n      \"type\": \"string\"\n    },\n    \"no_fact_found\": {\n      \"type\": \"boolean\"\n    },\n    \"facts\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"required\": [\n          \"fact\",\n          \"source\",\n          \"date\"\n        ],\n        \"properties\": {\n          \"fact\": {\n            \"type\": \"string\"\n          },\n          \"source\": {\n            \"type\": \"string\"\n          },\n          \"date\": {\n            \"type\": \"string\"\n          }\n        }\n      }\n    }\n  }\n}"
       },
-      "id": "187d0f27-4976-43fd-a41e-a5bf175516aa",
+      "id": "e2fbce42-5f87-4c79-b1e8-7e41096d9358",
       "name": "Researcher output",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -167,7 +167,7 @@
         "truncateResponse": true,
         "maxLength": 12000
       },
-      "id": "a273be28-e726-4740-8367-dda1ae9f2a58",
+      "id": "82dacff1-e25d-43c1-98e1-3b2c46416ac4",
       "name": "Fetch page",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -193,7 +193,7 @@
         "truncateResponse": true,
         "maxLength": 8000
       },
-      "id": "d4c8028b-043f-4f42-a8a8-6965aa4b9594",
+      "id": "b9d8a3c4-737d-4fb8-81bb-102a91078972",
       "name": "Search news",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
@@ -212,7 +212,7 @@
           "maxIterations": 12
         }
       },
-      "id": "3910a113-1a0e-420f-9259-cb4c79b4f626",
+      "id": "f08330b1-9713-412e-84a3-acb2ac440fae",
       "name": "Qualifier",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
@@ -236,7 +236,7 @@
           "maxTokensToSample": 4000
         }
       },
-      "id": "c3d4cdc2-1474-4746-839f-41d2560234bf",
+      "id": "ef9fae8c-05e3-4b3f-b771-0362e9e06296",
       "name": "Claude (qualifier)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -256,7 +256,7 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"score\",\n    \"keep\",\n    \"reason\",\n    \"opener_fact\",\n    \"opener_source\"\n  ],\n  \"properties\": {\n    \"score\": {\n      \"type\": \"number\"\n    },\n    \"keep\": {\n      \"type\": \"boolean\"\n    },\n    \"reason\": {\n      \"type\": \"string\"\n    },\n    \"opener_fact\": {\n      \"type\": \"string\"\n    },\n    \"opener_source\": {\n      \"type\": \"string\"\n    }\n  }\n}"
       },
-      "id": "5be73fee-7abe-40ef-b2b4-1e46e0f62762",
+      "id": "49341c27-32ee-49ec-b74b-06e37f9018db",
       "name": "Qualifier output",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -267,9 +267,9 @@
     },
     {
       "parameters": {
-        "jsCode": "\n// Qualifier rule: one lead per company, the highest score wins. Then keep score >= 60 and no disqualifier.\nconst leads = $('Keep matching leads').all().map(i => i.json);\nconst research = $('Researcher').all().map(i => i.json.output);\nconst rows = $input.all().map((it, i) => ({ ...leads[i], research: research[i], ...it.json.output }));\nconst best = {};\nfor (const r of rows) if (r.keep && (!best[r.company] || r.score > best[r.company].score)) best[r.company] = r;\nreturn Object.values(best).map(r => ({ json: r }));\n"
+        "jsCode": "\n// Qualifier rule: one lead per company, the highest score wins. Then keep score >= 60 and no disqualifier.\n// Each row is joined to the lead it came from (paired items), never by position.\nconst rows = $input.all().map((it, i) => ({\n  ...$('Keep matching leads').itemMatching(i).json,\n  research: $('Researcher').itemMatching(i).json.output,\n  ...it.json.output,\n}));\nconst best = {};\nfor (const r of rows) if (r.keep && (!best[r.company] || r.score > best[r.company].score)) best[r.company] = r;\nreturn Object.values(best).map(r => ({ json: r }));\n"
       },
-      "id": "54a4c8c0-b3ec-4e72-a8f7-82b4bbc1e807",
+      "id": "d79a242f-f052-4059-98cc-2c2a9897a702",
       "name": "One lead per company",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -288,7 +288,7 @@
           "maxIterations": 12
         }
       },
-      "id": "1263f8c6-d353-46a5-9c69-a210e043112c",
+      "id": "1951908e-c220-4439-92b7-efa8d3558278",
       "name": "Writer",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2.2,
@@ -312,7 +312,7 @@
           "maxTokensToSample": 4000
         }
       },
-      "id": "c5f1b174-96a9-4de3-a807-f5dbcb84d97b",
+      "id": "673d1f64-74d9-4c61-a594-6e213ab6387b",
       "name": "Claude (writer)",
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
@@ -332,7 +332,7 @@
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"required\": [\n    \"subject\",\n    \"body\"\n  ],\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\"\n    },\n    \"body\": {\n      \"type\": \"string\"\n    }\n  }\n}"
       },
-      "id": "58e77df2-64a4-4074-8eed-f65a1a2efbc0",
+      "id": "d701a5f1-fb2b-470a-9a45-6aa9226adcf9",
       "name": "Writer output",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
@@ -343,9 +343,9 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst drafts = $('Writer').all().map(i => i.json.output);\nreturn $('One lead per company').all().map((it, i) => ({ json: {\n  email: it.json.email, first_name: it.json.first_name, last_name: it.json.last_name, company: it.json.company,\n  score: it.json.score, subject: drafts[i].subject, body: drafts[i].body, source: it.json.opener_source || '',\n} }));\n"
+        "jsCode": "\nreturn $input.all().map((it, i) => {\n  const lead = $('One lead per company').itemMatching(i).json;\n  return { json: {\n    email: lead.email, first_name: lead.first_name, last_name: lead.last_name, company: lead.company,\n    score: lead.score, subject: it.json.output.subject, body: it.json.output.body, source: lead.opener_source || '',\n  } };\n});\n"
       },
-      "id": "975f1633-19bf-4404-9e50-e3232b88770a",
+      "id": "7926d2fa-0b2c-41d3-b60f-fb03fe8a1b6b",
       "name": "Email rows",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -361,7 +361,7 @@
           "fileName": "emails.csv"
         }
       },
-      "id": "81a945ca-baca-4bf7-aa7b-31fb922fbcd2",
+      "id": "d53d600a-abea-4501-a97a-b12fb45eae68",
       "name": "Emails CSV",
       "type": "n8n-nodes-base.convertToFile",
       "typeVersion": 1.1,

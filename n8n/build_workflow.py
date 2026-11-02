@@ -68,20 +68,25 @@ return kept.map((p, i) => ({ json: {
 
 ONE_PER_COMPANY_JS = r"""
 // Qualifier rule: one lead per company, the highest score wins. Then keep score >= 60 and no disqualifier.
-const leads = $('Keep matching leads').all().map(i => i.json);
-const research = $('Researcher').all().map(i => i.json.output);
-const rows = $input.all().map((it, i) => ({ ...leads[i], research: research[i], ...it.json.output }));
+// Each row is joined to the lead it came from (paired items), never by position.
+const rows = $input.all().map((it, i) => ({
+  ...$('Keep matching leads').itemMatching(i).json,
+  research: $('Researcher').itemMatching(i).json.output,
+  ...it.json.output,
+}));
 const best = {};
 for (const r of rows) if (r.keep && (!best[r.company] || r.score > best[r.company].score)) best[r.company] = r;
 return Object.values(best).map(r => ({ json: r }));
 """
 
 CSV_JS = r"""
-const drafts = $('Writer').all().map(i => i.json.output);
-return $('One lead per company').all().map((it, i) => ({ json: {
-  email: it.json.email, first_name: it.json.first_name, last_name: it.json.last_name, company: it.json.company,
-  score: it.json.score, subject: drafts[i].subject, body: drafts[i].body, source: it.json.opener_source || '',
-} }));
+return $input.all().map((it, i) => {
+  const lead = $('One lead per company').itemMatching(i).json;
+  return { json: {
+    email: lead.email, first_name: lead.first_name, last_name: lead.last_name, company: lead.company,
+    score: lead.score, subject: it.json.output.subject, body: it.json.output.body, source: lead.opener_source || '',
+  } };
+});
 """
 
 RESEARCH_SYSTEM = """You are the researcher of a prospecting team. You find facts. You do not judge fit and you do not write emails.
