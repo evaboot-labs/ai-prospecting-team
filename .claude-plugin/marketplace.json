@@ -1,0 +1,14 @@
+{
+  "name": "evaboot-labs-ai-prospecting-team",
+  "owner": { "name": "Evaboot", "url": "https://evaboot.com" },
+  "metadata": {
+    "description": "Four Claude Code subagents that prospect as a team: list builder, researchers, qualifier and writer."
+  },
+  "plugins": [
+    {
+      "name": "ai-prospecting-team",
+      "source": "./",
+      "description": "Run a prospecting team of four Claude Code subagents: a list builder that exports leads with the Evaboot MCP, researchers, a qualifier and a writer that drafts one email per kept lead. Nothing is sent."
+    }
+  ]
+}
